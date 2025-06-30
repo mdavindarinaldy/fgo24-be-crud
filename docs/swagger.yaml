@@ -108,6 +108,29 @@ paths:
             $ref: '#/definitions/utils.Response'
       tags:
       - delete
+    get:
+      consumes:
+      - application/json
+      description: Get detail user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ResponseUser'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      tags:
+      - user
     patch:
       consumes:
       - application/json

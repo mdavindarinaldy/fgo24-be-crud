@@ -3,7 +3,6 @@ package models
 import (
 	"backend2/utils"
 	"context"
-	"strconv"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -36,20 +35,19 @@ func FindAllUsers() ([]ResponseUser, error) {
 	return users, nil
 }
 
-func FindUser(idParam string) ([]User, error) {
+func FindUser(id int) (ResponseUser, error) {
 	conn, err := utils.DBConnect()
 	if err != nil {
-		return []User{}, err
+		return ResponseUser{}, err
 	}
 	defer conn.Close()
-	id, _ := strconv.Atoi(idParam)
 	rows, err := conn.Query(context.Background(), `SELECT name, email FROM users WHERE id = $1`, id)
 	if err != nil {
-		return []User{}, err
+		return ResponseUser{}, err
 	}
-	users, err := pgx.CollectRows[User](rows, pgx.RowToStructByName)
+	users, err := pgx.CollectOneRow[ResponseUser](rows, pgx.RowToStructByName)
 	if err != nil {
-		return []User{}, err
+		return ResponseUser{}, err
 	}
 	return users, nil
 }

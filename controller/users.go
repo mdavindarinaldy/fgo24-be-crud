@@ -109,8 +109,16 @@ func UpdateUser(c *gin.Context) {
 	})
 }
 
+// @Description Get detail user
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 201 {object} models.ResponseUser
+// @Failure 500 {object} utils.Response
+// @Router /users/{id} [get]
 func GetUser(c *gin.Context) {
-	id := c.Param("id")
+	id, _ := strconv.Atoi(c.Param("id"))
 	user, err := models.FindUser(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.Response{
