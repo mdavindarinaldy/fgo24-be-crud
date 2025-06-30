@@ -26,7 +26,6 @@ func DBConnect() (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, err
 	}
-	// conn, _ := pool.Acquire(context.Background())
 
 	return pool, nil
 }
