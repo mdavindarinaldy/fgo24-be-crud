@@ -14,21 +14,24 @@ type User struct {
 	Password string `form:"password" json:"password" db:"password"`
 }
 
-// var Users []User
+type ResponseUser struct {
+	Name  string `form:"name" json:"name" db:"name" binding:"required"`
+	Email string `form:"email" json:"email" db:"email" binding:"required,email"`
+}
 
-func FindAllUsers() ([]User, error) {
+func FindAllUsers() ([]ResponseUser, error) {
 	conn, err := utils.DBConnect()
 	if err != nil {
-		return []User{}, err
+		return []ResponseUser{}, err
 	}
 	defer conn.Close()
-	rows, err := conn.Query(context.Background(), `SELECT name, email FROM users`)
+	rows, err := conn.Query(context.Background(), `SELECT name, email, password FROM users`)
 	if err != nil {
-		return []User{}, err
+		return []ResponseUser{}, err
 	}
-	users, err := pgx.CollectRows[User](rows, pgx.RowToStructByName)
+	users, err := pgx.CollectRows[ResponseUser](rows, pgx.RowToStructByName)
 	if err != nil {
-		return []User{}, err
+		return []ResponseUser{}, err
 	}
 	return users, nil
 }
