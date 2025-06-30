@@ -8,6 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Description Create new user
+// @Tags createuser
+// @Accept json
+// @Produce json
+// @Param user body models.User true "User Data"
+// @Success 201 {object} models.ResponseUser
+// @Router /users [post]
 func CreateUser(c *gin.Context) {
 	user := models.User{}
 	c.ShouldBind(&user)
@@ -32,6 +39,10 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Response{
 		Success: true,
 		Message: "Create user success!",
+		Result: models.ResponseUser{
+			Name:  user.Name,
+			Email: user.Email,
+		},
 	})
 }
 

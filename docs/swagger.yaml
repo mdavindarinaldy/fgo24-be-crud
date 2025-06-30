@@ -1,4 +1,27 @@
 basePath: /
+definitions:
+  models.ResponseUser:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  models.User:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    type: object
 info:
   contact: {}
   description: CRUD Swagger
@@ -19,4 +42,24 @@ paths:
             type: string
       tags:
       - users
+    post:
+      consumes:
+      - application/json
+      description: Create new user
+      parameters:
+      - description: User Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ResponseUser'
+      tags:
+      - createuser
 swagger: "2.0"
