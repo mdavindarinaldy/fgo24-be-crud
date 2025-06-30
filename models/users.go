@@ -84,13 +84,12 @@ func UpdateUser(id int, user User) error {
 	return nil
 }
 
-func DeleteUser(idParam string) error {
+func DeleteUser(id int) error {
 	conn, err := utils.DBConnect()
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
-	id, _ := strconv.Atoi(idParam)
 	_, err = conn.Exec(context.Background(), `DELETE FROM users WHERE id = $1`, id)
 	if err != nil {
 		return err

@@ -126,8 +126,16 @@ func GetUser(c *gin.Context) {
 	})
 }
 
+// @Description Update user
+// @Tags delete
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} utils.Response
+// @Failure 500 {object} utils.Response
+// @Router /users/{id} [delete]
 func DeleteUser(c *gin.Context) {
-	id := c.Param("id")
+	id, _ := strconv.Atoi(c.Param("id"))
 	err := models.DeleteUser(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.Response{
