@@ -1,0 +1,22 @@
+basePath: /
+info:
+  contact: {}
+  description: CRUD Swagger
+  title: CRUD
+  version: "1.0"
+paths:
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: List all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: string
+          schema:
+            type: string
+      tags:
+      - users
+swagger: "2.0"

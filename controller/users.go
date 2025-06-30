@@ -12,10 +12,6 @@ func CreateUser(c *gin.Context) {
 	user := models.User{}
 	c.ShouldBind(&user)
 
-	// c.Header("Access-Control-Allow-Origin", "https://koda-naldy.postman.co/")
-	// c.Header("Access-Control-Allow-Headers", "authorization")
-	// c.Header("Access-Control-Allow-Method", "POST")
-
 	if user.Email == "" || user.Name == "" || user.Password == "" {
 		c.JSON(http.StatusBadRequest, utils.Response{
 			Success: false,
@@ -39,6 +35,12 @@ func CreateUser(c *gin.Context) {
 	})
 }
 
+// @Description List all users
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {string} string "string"
+// @Router /users [get]
 func GetAllUsers(c *gin.Context) {
 	users, err := models.FindAllUsers()
 

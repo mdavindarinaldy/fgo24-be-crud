@@ -9,6 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @title CRUD
+// @version         1.0
+// @description     CRUD Swagger
+// @BasePath /
+
 func main() {
 	db, err := utils.DBConnect()
 	if err != nil {
