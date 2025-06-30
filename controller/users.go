@@ -4,6 +4,7 @@ import (
 	"backend2/models"
 	"backend2/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +15,8 @@ import (
 // @Produce json
 // @Param user body models.User true "User Data"
 // @Success 201 {object} models.ResponseUser
+// @Failure 404 {object} utils.Response
+// @Failure 500 {object} utils.Response
 // @Router /users [post]
 func CreateUser(c *gin.Context) {
 	user := models.User{}
@@ -51,6 +54,7 @@ func CreateUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {string} string "string"
+// @Failure 500 {object} utils.Response
 // @Router /users [get]
 func GetAllUsers(c *gin.Context) {
 	users, err := models.FindAllUsers()
@@ -73,8 +77,36 @@ func GetAllUsers(c *gin.Context) {
 	})
 }
 
+// @Description Update user
+// @Tags update
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Param user body models.User true "User Data"
+// @Success 201 {object} models.ResponseUser
+// @Failure 500 {object} utils.Response
+// @Router /users/{id} [patch]
 func UpdateUser(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	user := models.User{}
+	c.ShouldBind(&user)
 
+	err := models.UpdateUser(id, user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to update data",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success to update data",
+		Result: models.ResponseUser{
+			Name:  user.Name,
+			Email: user.Email,
+		},
+	})
 }
 
 func GetUser(c *gin.Context) {

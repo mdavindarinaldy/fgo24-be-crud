@@ -67,6 +67,23 @@ func CreateUser(user User) error {
 	return nil
 }
 
+func UpdateUser(id int, user User) error {
+	conn, err := utils.DBConnect()
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	_, err = conn.Exec(
+		context.Background(),
+		`UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4`,
+		user.Name, user.Email, user.Password, id,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func DeleteUser(idParam string) error {
 	conn, err := utils.DBConnect()
 	if err != nil {

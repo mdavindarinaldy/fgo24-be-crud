@@ -22,6 +22,16 @@ definitions:
     - email
     - name
     type: object
+  utils.Response:
+    properties:
+      errors: {}
+      message:
+        type: string
+      pageInfo: {}
+      results: {}
+      success:
+        type: boolean
+    type: object
 info:
   contact: {}
   description: CRUD Swagger
@@ -40,6 +50,10 @@ paths:
           description: string
           schema:
             type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
       tags:
       - users
     post:
@@ -60,6 +74,44 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/models.ResponseUser'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
       tags:
       - createuser
+  /users/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ResponseUser'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      tags:
+      - update
 swagger: "2.0"
