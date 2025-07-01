@@ -3,6 +3,7 @@ package models
 import (
 	"backend2/utils"
 	"context"
+	"encoding/json"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -19,20 +20,36 @@ type ResponseUser struct {
 }
 
 func FindAllUsers() ([]ResponseUser, error) {
-	conn, err := utils.DBConnect()
-	if err != nil {
-		return []ResponseUser{}, err
+	result := utils.RedistClient.Exists(context.Background(), "/users")
+	if result.Val() == 0 {
+		conn, err := utils.DBConnect()
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+		defer conn.Close()
+		rows, err := conn.Query(context.Background(), `SELECT name, email FROM users`)
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+		users, err := pgx.CollectRows[ResponseUser](rows, pgx.RowToStructByName)
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+
+		encoded, err := json.Marshal(users)
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+
+		utils.RedistClient.Set(context.Background(), "/users", string(encoded), 0)
+		return users, nil
+	} else {
+		data := utils.RedistClient.Get(context.Background(), "/users")
+		str := data.Val()
+		users := []ResponseUser{}
+		json.Unmarshal([]byte(str), &users)
+		return users, nil
 	}
-	defer conn.Close()
-	rows, err := conn.Query(context.Background(), `SELECT name, email, password FROM users`)
-	if err != nil {
-		return []ResponseUser{}, err
-	}
-	users, err := pgx.CollectRows[ResponseUser](rows, pgx.RowToStructByName)
-	if err != nil {
-		return []ResponseUser{}, err
-	}
-	return users, nil
 }
 
 func FindUser(id int) (ResponseUser, error) {
