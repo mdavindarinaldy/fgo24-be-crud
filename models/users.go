@@ -21,7 +21,8 @@ type ResponseUser struct {
 }
 
 func FindAllUsers() ([]ResponseUser, error) {
-	result := utils.RedistClient.Exists(context.Background(), "/users")
+	rdClient := utils.RedisConnect()
+	result := rdClient.Exists(context.Background(), "/users")
 	if result.Val() == 0 {
 		conn, err := utils.DBConnect()
 		if err != nil {
@@ -42,10 +43,10 @@ func FindAllUsers() ([]ResponseUser, error) {
 			return []ResponseUser{}, err
 		}
 
-		utils.RedistClient.Set(context.Background(), "/users", string(encoded), 0)
+		rdClient.Set(context.Background(), "/users", string(encoded), 0)
 		return users, nil
 	} else {
-		data := utils.RedistClient.Get(context.Background(), "/users")
+		data := rdClient.Get(context.Background(), "/users")
 		str := data.Val()
 		users := []ResponseUser{}
 		json.Unmarshal([]byte(str), &users)
@@ -54,8 +55,9 @@ func FindAllUsers() ([]ResponseUser, error) {
 }
 
 func FindUser(id int) (ResponseUser, error) {
+	rdClient := utils.RedisConnect()
 	redisEndpoint := fmt.Sprintf("/users:%d", id)
-	result := utils.RedistClient.Exists(context.Background(), redisEndpoint)
+	result := rdClient.Exists(context.Background(), redisEndpoint)
 	if result.Val() == 0 {
 		conn, err := utils.DBConnect()
 		if err != nil {
@@ -74,10 +76,10 @@ func FindUser(id int) (ResponseUser, error) {
 		if err != nil {
 			return ResponseUser{}, err
 		}
-		utils.RedistClient.Set(context.Background(), redisEndpoint, string(encoded), 0)
+		rdClient.Set(context.Background(), redisEndpoint, string(encoded), 0)
 		return user, nil
 	} else {
-		data := utils.RedistClient.Get(context.Background(), redisEndpoint)
+		data := rdClient.Get(context.Background(), redisEndpoint)
 		str := data.Val()
 		user := ResponseUser{}
 		json.Unmarshal([]byte(str), &user)
@@ -95,9 +97,10 @@ func CreateUser(user User) error {
 	if err != nil {
 		return err
 	}
-	result := utils.RedistClient.Exists(context.Background(), "/users")
+	rdClient := utils.RedisConnect()
+	result := rdClient.Exists(context.Background(), "/users")
 	if result.Val() != 0 {
-		utils.RedistClient.Del(context.Background(), "/users")
+		rdClient.Del(context.Background(), "/users")
 	}
 	return nil
 }
@@ -117,10 +120,11 @@ func UpdateUser(id int, user User) error {
 		return err
 	}
 
+	rdClient := utils.RedisConnect()
 	redisEndpoint := fmt.Sprintf("/users:%d", id)
-	result := utils.RedistClient.Exists(context.Background(), redisEndpoint)
+	result := rdClient.Exists(context.Background(), redisEndpoint)
 	if result.Val() != 0 {
-		utils.RedistClient.Del(context.Background(), redisEndpoint)
+		rdClient.Del(context.Background(), redisEndpoint)
 	}
 
 	return nil
@@ -137,15 +141,16 @@ func DeleteUser(id int) error {
 		return err
 	}
 
+	rdClient := utils.RedisConnect()
 	redisEndpoint := fmt.Sprintf("/users:%d", id)
-	result := utils.RedistClient.Exists(context.Background(), redisEndpoint)
+	result := rdClient.Exists(context.Background(), redisEndpoint)
 	if result.Val() != 0 {
-		utils.RedistClient.Del(context.Background(), redisEndpoint)
+		rdClient.Del(context.Background(), redisEndpoint)
 	}
 
-	result = utils.RedistClient.Exists(context.Background(), "/users")
+	result = rdClient.Exists(context.Background(), "/users")
 	if result.Val() != 0 {
-		utils.RedistClient.Del(context.Background(), "/users")
+		rdClient.Del(context.Background(), "/users")
 	}
 
 	return nil
