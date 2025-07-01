@@ -4,6 +4,7 @@ import (
 	"backend2/utils"
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -53,20 +54,35 @@ func FindAllUsers() ([]ResponseUser, error) {
 }
 
 func FindUser(id int) (ResponseUser, error) {
-	conn, err := utils.DBConnect()
-	if err != nil {
-		return ResponseUser{}, err
+	redistEndpoint := fmt.Sprintf("/users:%d", id)
+	result := utils.RedistClient.Exists(context.Background(), redistEndpoint)
+	if result.Val() == 0 {
+		conn, err := utils.DBConnect()
+		if err != nil {
+			return ResponseUser{}, err
+		}
+		defer conn.Close()
+		rows, err := conn.Query(context.Background(), `SELECT name, email FROM users WHERE id = $1`, id)
+		if err != nil {
+			return ResponseUser{}, err
+		}
+		user, err := pgx.CollectOneRow[ResponseUser](rows, pgx.RowToStructByName)
+		if err != nil {
+			return ResponseUser{}, err
+		}
+		encoded, err := json.Marshal(user)
+		if err != nil {
+			return ResponseUser{}, err
+		}
+		utils.RedistClient.Set(context.Background(), redistEndpoint, string(encoded), 0)
+		return user, nil
+	} else {
+		data := utils.RedistClient.Get(context.Background(), redistEndpoint)
+		str := data.Val()
+		user := ResponseUser{}
+		json.Unmarshal([]byte(str), &user)
+		return user, nil
 	}
-	defer conn.Close()
-	rows, err := conn.Query(context.Background(), `SELECT name, email FROM users WHERE id = $1`, id)
-	if err != nil {
-		return ResponseUser{}, err
-	}
-	users, err := pgx.CollectOneRow[ResponseUser](rows, pgx.RowToStructByName)
-	if err != nil {
-		return ResponseUser{}, err
-	}
-	return users, nil
 }
 
 func CreateUser(user User) error {
