@@ -1,4 +1,4 @@
-# Project Backend Go - E Wallet
+# Project Backend Go - CRUD
 
 This project was made by Muhammad Davinda Rinaldy in Kodacademy Training Program. This project uses Go Language (and PostgreSQL for the database) to make a backend application for basic CRUD simulation.
 
