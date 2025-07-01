@@ -116,6 +116,13 @@ func UpdateUser(id int, user User) error {
 	if err != nil {
 		return err
 	}
+
+	redisEndpoint := fmt.Sprintf("/users:%d", id)
+	result := utils.RedistClient.Exists(context.Background(), redisEndpoint)
+	if result.Val() != 0 {
+		utils.RedistClient.Del(context.Background(), redisEndpoint)
+	}
+
 	return nil
 }
 
