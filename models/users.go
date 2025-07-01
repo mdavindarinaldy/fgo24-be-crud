@@ -136,5 +136,17 @@ func DeleteUser(id int) error {
 	if err != nil {
 		return err
 	}
+
+	redisEndpoint := fmt.Sprintf("/users:%d", id)
+	result := utils.RedistClient.Exists(context.Background(), redisEndpoint)
+	if result.Val() != 0 {
+		utils.RedistClient.Del(context.Background(), redisEndpoint)
+	}
+
+	result = utils.RedistClient.Exists(context.Background(), "/users")
+	if result.Val() != 0 {
+		utils.RedistClient.Del(context.Background(), "/users")
+	}
+
 	return nil
 }
