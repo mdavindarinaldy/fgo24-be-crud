@@ -18,7 +18,14 @@ services:
       - ./.env:/app/.env
     networks:
       - netapp
+  redis:
+    image: redis
+    volumes:
+      - data_redis:/data
+    networks:
+      - netapp
 volumes:
   data_postgres: {}
+  data_redis: {}
 networks:
   netapp: {}
