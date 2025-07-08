@@ -10,18 +10,6 @@ definitions:
     - email
     - name
     type: object
-  models.User:
-    properties:
-      email:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - name
-    type: object
   utils.Response:
     properties:
       errors: {}
@@ -41,7 +29,7 @@ paths:
   /users:
     get:
       consumes:
-      - application/json
+      - application/x-www-form-urlencoded
       description: List all users
       produces:
       - application/json
@@ -58,15 +46,20 @@ paths:
       - users
     post:
       consumes:
-      - application/json
+      - application/x-www-form-urlencoded
       description: Create new user
       parameters:
-      - description: User Data
-        in: body
-        name: user
+      - in: formData
+        name: email
         required: true
-        schema:
-          $ref: '#/definitions/models.User'
+        type: string
+      - in: formData
+        name: name
+        required: true
+        type: string
+      - in: formData
+        name: password
+        type: string
       produces:
       - application/json
       responses:
@@ -87,8 +80,8 @@ paths:
   /users/{id}:
     delete:
       consumes:
-      - application/json
-      description: Update user
+      - application/x-www-form-urlencoded
+      description: Delete user
       parameters:
       - description: User ID
         in: path
@@ -110,7 +103,7 @@ paths:
       - delete
     get:
       consumes:
-      - application/json
+      - application/x-www-form-urlencoded
       description: Get detail user
       parameters:
       - description: User ID
@@ -133,7 +126,7 @@ paths:
       - user
     patch:
       consumes:
-      - application/json
+      - application/x-www-form-urlencoded
       description: Update user
       parameters:
       - description: User ID
@@ -141,12 +134,17 @@ paths:
         name: id
         required: true
         type: integer
-      - description: User Data
-        in: body
-        name: user
+      - in: formData
+        name: email
         required: true
-        schema:
-          $ref: '#/definitions/models.User'
+        type: string
+      - in: formData
+        name: name
+        required: true
+        type: string
+      - in: formData
+        name: password
+        type: string
       produces:
       - application/json
       responses:
