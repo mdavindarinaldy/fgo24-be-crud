@@ -11,9 +11,9 @@ import (
 
 // @Description Create new user
 // @Tags createuser
-// @Accept json
+// @Accept x-www-form-urlencoded
 // @Produce json
-// @Param user body models.User true "User Data"
+// @Param user formData models.User true "User Data"
 // @Success 201 {object} models.ResponseUser
 // @Failure 404 {object} utils.Response
 // @Failure 500 {object} utils.Response
@@ -51,7 +51,7 @@ func CreateUser(c *gin.Context) {
 
 // @Description List all users
 // @Tags users
-// @Accept json
+// @Accept x-www-form-urlencoded
 // @Produce json
 // @Success 200 {string} string "string"
 // @Failure 500 {object} utils.Response
@@ -79,10 +79,10 @@ func GetAllUsers(c *gin.Context) {
 
 // @Description Update user
 // @Tags update
-// @Accept json
+// @Accept x-www-form-urlencoded
 // @Produce json
 // @Param id path int true "User ID"
-// @Param user body models.User true "User Data"
+// @Param user formData models.User true "User Data"
 // @Success 201 {object} models.ResponseUser
 // @Failure 500 {object} utils.Response
 // @Router /users/{id} [patch]
@@ -111,7 +111,7 @@ func UpdateUser(c *gin.Context) {
 
 // @Description Get detail user
 // @Tags user
-// @Accept json
+// @Accept x-www-form-urlencoded
 // @Produce json
 // @Param id path int true "User ID"
 // @Success 201 {object} models.ResponseUser
@@ -134,9 +134,9 @@ func GetUser(c *gin.Context) {
 	})
 }
 
-// @Description Update user
+// @Description Delete user
 // @Tags delete
-// @Accept json
+// @Accept x-www-form-urlencoded
 // @Produce json
 // @Param id path int true "User ID"
 // @Success 200 {object} utils.Response

@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    networks:
+      - netapp
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=1
+    container_name: crudpg
+    networks:
+      - netapp
+networks:
+  netapp:
