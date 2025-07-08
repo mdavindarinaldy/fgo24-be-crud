@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    networks:
+      - netapp
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=1
+    container_name: crudpg
+    volumes:
+      - data_postgres:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./.env:/app/.env
+    networks:
+      - netapp
+volumes:
+  data_postgres: {}
+networks:
+  netapp: {}
