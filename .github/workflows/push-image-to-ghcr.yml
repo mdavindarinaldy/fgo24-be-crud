@@ -12,3 +12,14 @@ jobs:
         with:
           image_name: ${{ github.repository }}  # it will be lowercased internally
           github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy to VPS
+        uses: a2m1/slim-ssh-action@master
+        with:
+          username: ${{ secrets.REMOTE_USER }}
+          host: ${{ secrets.REMOTE_HOST }}
+          fingerprint: ${{ secrets.REMOTE_FINGERPRINT }}
+          key: ${{ secrets.KEY }}
+          script: |
+            docker pull ghcr.io/${{ github.repository }}
+            cd /home/user/app
+            docker-compose up -d

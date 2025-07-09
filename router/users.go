@@ -12,4 +12,5 @@ func userRouter(r *gin.RouterGroup) {
 	r.POST("", controller.CreateUser)
 	r.PATCH("/:id", controller.UpdateUser)
 	r.DELETE("/:id", controller.DeleteUser)
+	r.GET("/sort", controller.SortUser)
 }

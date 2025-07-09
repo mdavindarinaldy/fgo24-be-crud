@@ -155,3 +155,37 @@ func DeleteUser(id int) error {
 
 	return nil
 }
+
+func SortAllUser() ([]ResponseUser, error) {
+	rdClient := utils.RedisConnect()
+	result := rdClient.Exists(context.Background(), "/users/sort")
+	if result.Val() == 0 {
+		conn, err := utils.DBConnect()
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+		defer conn.Close()
+		rows, err := conn.Query(context.Background(), `SELECT name, email FROM users ORDER BY name ASC`)
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+		users, err := pgx.CollectRows[ResponseUser](rows, pgx.RowToStructByName)
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+
+		encoded, err := json.Marshal(users)
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+
+		rdClient.Set(context.Background(), "/users/sort", string(encoded), 0)
+		return users, nil
+	} else {
+		data := rdClient.Get(context.Background(), "/users/sort")
+		str := data.Val()
+		users := []ResponseUser{}
+		json.Unmarshal([]byte(str), &users)
+		return users, nil
+	}
+}

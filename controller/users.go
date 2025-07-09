@@ -157,3 +157,31 @@ func DeleteUser(c *gin.Context) {
 		Message: "Delete user success",
 	})
 }
+
+// @Description List all users
+// @Tags users
+// @Accept x-www-form-urlencoded
+// @Produce json
+// @Success 200 {string} string "string"
+// @Failure 500 {object} utils.Response
+// @Router /users/sort [get]
+func SortUser(c *gin.Context) {
+	users, err := models.FindAllUsers()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to get data",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Get data all users success!",
+		PageInfo: map[string]any{
+			"totalData": len(users),
+		},
+		Result: users,
+	})
+}
