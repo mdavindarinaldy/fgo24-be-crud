@@ -3,6 +3,8 @@ package models
 import (
 	"backend2/utils"
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -19,37 +21,70 @@ type ResponseUser struct {
 }
 
 func FindAllUsers() ([]ResponseUser, error) {
-	conn, err := utils.DBConnect()
-	if err != nil {
-		return []ResponseUser{}, err
+	rdClient := utils.RedisConnect()
+	result := rdClient.Exists(context.Background(), "/users")
+	if result.Val() == 0 {
+		conn, err := utils.DBConnect()
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+		defer conn.Close()
+		rows, err := conn.Query(context.Background(), `SELECT name, email FROM users`)
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+		users, err := pgx.CollectRows[ResponseUser](rows, pgx.RowToStructByName)
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+
+		encoded, err := json.Marshal(users)
+		if err != nil {
+			return []ResponseUser{}, err
+		}
+
+		rdClient.Set(context.Background(), "/users", string(encoded), 0)
+		return users, nil
+	} else {
+		data := rdClient.Get(context.Background(), "/users")
+		str := data.Val()
+		users := []ResponseUser{}
+		json.Unmarshal([]byte(str), &users)
+		return users, nil
 	}
-	defer conn.Close()
-	rows, err := conn.Query(context.Background(), `SELECT name, email, password FROM users`)
-	if err != nil {
-		return []ResponseUser{}, err
-	}
-	users, err := pgx.CollectRows[ResponseUser](rows, pgx.RowToStructByName)
-	if err != nil {
-		return []ResponseUser{}, err
-	}
-	return users, nil
 }
 
 func FindUser(id int) (ResponseUser, error) {
-	conn, err := utils.DBConnect()
-	if err != nil {
-		return ResponseUser{}, err
+	rdClient := utils.RedisConnect()
+	redisEndpoint := fmt.Sprintf("/users:%d", id)
+	result := rdClient.Exists(context.Background(), redisEndpoint)
+	if result.Val() == 0 {
+		conn, err := utils.DBConnect()
+		if err != nil {
+			return ResponseUser{}, err
+		}
+		defer conn.Close()
+		rows, err := conn.Query(context.Background(), `SELECT name, email FROM users WHERE id = $1`, id)
+		if err != nil {
+			return ResponseUser{}, err
+		}
+		user, err := pgx.CollectOneRow[ResponseUser](rows, pgx.RowToStructByName)
+		if err != nil {
+			return ResponseUser{}, err
+		}
+		encoded, err := json.Marshal(user)
+		if err != nil {
+			return ResponseUser{}, err
+		}
+		rdClient.Set(context.Background(), redisEndpoint, string(encoded), 0)
+		return user, nil
+	} else {
+		data := rdClient.Get(context.Background(), redisEndpoint)
+		str := data.Val()
+		user := ResponseUser{}
+		json.Unmarshal([]byte(str), &user)
+		return user, nil
 	}
-	defer conn.Close()
-	rows, err := conn.Query(context.Background(), `SELECT name, email FROM users WHERE id = $1`, id)
-	if err != nil {
-		return ResponseUser{}, err
-	}
-	users, err := pgx.CollectOneRow[ResponseUser](rows, pgx.RowToStructByName)
-	if err != nil {
-		return ResponseUser{}, err
-	}
-	return users, nil
 }
 
 func CreateUser(user User) error {
@@ -61,6 +96,11 @@ func CreateUser(user User) error {
 	_, err = conn.Exec(context.Background(), `INSERT INTO users (name, email, password) VALUES ($1,$2,$3)`, user.Name, user.Email, user.Password)
 	if err != nil {
 		return err
+	}
+	rdClient := utils.RedisConnect()
+	result := rdClient.Exists(context.Background(), "/users")
+	if result.Val() != 0 {
+		rdClient.Del(context.Background(), "/users")
 	}
 	return nil
 }
@@ -79,6 +119,14 @@ func UpdateUser(id int, user User) error {
 	if err != nil {
 		return err
 	}
+
+	rdClient := utils.RedisConnect()
+	redisEndpoint := fmt.Sprintf("/users:%d", id)
+	result := rdClient.Exists(context.Background(), redisEndpoint)
+	if result.Val() != 0 {
+		rdClient.Del(context.Background(), redisEndpoint)
+	}
+
 	return nil
 }
 
@@ -92,5 +140,18 @@ func DeleteUser(id int) error {
 	if err != nil {
 		return err
 	}
+
+	rdClient := utils.RedisConnect()
+	redisEndpoint := fmt.Sprintf("/users:%d", id)
+	result := rdClient.Exists(context.Background(), redisEndpoint)
+	if result.Val() != 0 {
+		rdClient.Del(context.Background(), redisEndpoint)
+	}
+
+	result = rdClient.Exists(context.Background(), "/users")
+	if result.Val() != 0 {
+		rdClient.Del(context.Background(), "/users")
+	}
+
 	return nil
 }
