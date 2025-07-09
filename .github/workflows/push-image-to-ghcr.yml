@@ -19,6 +19,7 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           fingerprint: ${{ secrets.REMOTE_FINGERPRINT }}
           key: ${{ secrets.KEY }}
+          port: 9601
           script: |
             docker pull ghcr.io/${{ github.repository }}
             cd ~
