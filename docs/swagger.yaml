@@ -158,4 +158,22 @@ paths:
             $ref: '#/definitions/utils.Response'
       tags:
       - update
+  /users/sort:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: List all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: string
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      tags:
+      - users
 swagger: "2.0"
