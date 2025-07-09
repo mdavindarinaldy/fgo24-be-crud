@@ -22,5 +22,5 @@ jobs:
           script: |
             docker pull ghcr.io/${{ github.repository }}
             cd ~
-            cd fgo24/be-crud
+            cd fgo24-be-crud
             docker-compose up -d
