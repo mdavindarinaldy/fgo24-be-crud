@@ -13,13 +13,12 @@ jobs:
           image_name: ${{ github.repository }}  # it will be lowercased internally
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy to VPS
-        uses: a2m1/slim-ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           username: ${{ secrets.REMOTE_USER }}
           host: ${{ secrets.REMOTE_HOST }}
-          fingerprint: ${{ secrets.REMOTE_FINGERPRINT }}
           key: ${{ secrets.KEY }}
-          port: 9601
+          port: ${{ secrets.PORT }}
           script: |
             docker pull ghcr.io/${{ github.repository }}
             cd ~
