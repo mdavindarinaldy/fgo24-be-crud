@@ -166,7 +166,7 @@ func DeleteUser(c *gin.Context) {
 // @Failure 500 {object} utils.Response
 // @Router /users/sort [get]
 func SortUser(c *gin.Context) {
-	users, err := models.FindAllUsers()
+	users, err := models.SortAllUser()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.Response{
