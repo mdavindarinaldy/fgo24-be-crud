@@ -165,7 +165,7 @@ func SortAllUser() ([]ResponseUser, error) {
 			return []ResponseUser{}, err
 		}
 		defer conn.Close()
-		rows, err := conn.Query(context.Background(), `SELECT name, email FROM users ORDER BY name ASC`)
+		rows, err := conn.Query(context.Background(), `SELECT name, email FROM users ORDER BY name DESC`)
 		if err != nil {
 			return []ResponseUser{}, err
 		}
